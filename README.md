@@ -16,8 +16,16 @@ pip install biopython
 
 # 使用
 
-==具体功能可以看源代码==
 
 ```shell
-python download_BGI_data.py
+Usage: python ezbiocloud.py -f/--fastaFile <fasta file> -o/--outputPath <output annotation file path>
+
+Example: python ezbiocloud.py -f example.fasta -o ./
+
+Options:
+  -h, --help            show this help message and exit
+  -f FASTAFILE, --fastaFile=FASTAFILE
+                        fastaFile
+  -o OUTPUTPATH, --outputPath=OUTPUTPATH
+                        output annotation file path
 ```
