@@ -9,7 +9,7 @@ from os import path
 import re
 import optparse
 import getpass
-
+import datetime
 class EZ:
     cj = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
@@ -19,6 +19,10 @@ class EZ:
     delete_jobs_url = "https://www.ezbiocloud.net/cl16s/delete_jobs"
     def __init__(self, baseDir):
         self.baseDir = baseDir
+        outputTemp = path.join(self.baseDir,"ez_temp")
+        if not path.exists(outputTemp):
+            os.makedirs(outputTemp)
+        self.baseDir = outputTemp
 
     def login(self,username,password):
         formData = {
@@ -39,8 +43,15 @@ class EZ:
 
         records = SeqIO.parse(fastaFile, "fasta")
         records = list(records)
+
         count = 0
         flag = 0
+
+        if path.exists(path.join(self.baseDir,"ez_status.json")):
+            with open(path.join(self.baseDir,"ez_status.json"), "r") as f:
+                statusDict = json.load(f)
+                count = statusDict["count"]
+                flag = statusDict["flag"]
         while count < len(records):
             formData = {
                 "jsonStr": []
@@ -66,10 +77,12 @@ class EZ:
 
             res = self.opener.open(req)
             json_data = json.loads(res.read().decode())
-            print(json_data)
+            print(datetime.datetime.now(), json_data)
             flag += 1
             if count%150 == 0 or count == len(records):
                 idList = self.getJobs(count)
+                with open(path.join(self.baseDir,"ez_status.json"),"w") as f:
+                    json.dump({"count":count,"flag":flag},f)
                 if count != len(records):
                     self.deleteJobs(idList)
 
@@ -179,6 +192,6 @@ if __name__ == '__main__':
     ez.login(username,password)
     ez.deleteAllJobs()
     ez.submitData(options.fastaFile)
-    ez.mergeData2()
+    ez.mergeData()
 
 
